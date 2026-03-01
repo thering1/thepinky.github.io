@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Pinky</title>
     <link rel="icon" type="image/png" href="PMLogo.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --pinky-green: #8da399; /* Faded Green */
-            --pinky-red: #a35d5d;   /* Faded Brown-Red */
-            --pinky-bg: #2b2b2b;
+            /* Transparency applied to the green and red */
+            --pinky-green-trans: rgba(141, 163, 153, 0.6); 
+            --pinky-red-trans: rgba(163, 93, 93, 0.4);   
+            --pinky-bg: #1a1a1a; /* Deeper default background */
+            --old-paper: #f9f5e0; /* Aged paper tint for threads */
         }
 
         body { 
@@ -18,44 +23,78 @@
         }
 
         /* --- BANNERS --- */
-        .top-bar { background: var(--pinky-green); padding: 15px; text-align: center; border-bottom: 3px solid var(--pinky-red); z-index: 10; }
-        .top-bar h1 { margin: 0; letter-spacing: 8px; font-weight: 900; color: #3d4a44; text-transform: uppercase; }
+        .top-bar { 
+            background: var(--pinky-green-trans); /* Transparent banner */
+            padding: 15px; text-align: center; 
+            border-bottom: 2px solid rgba(163, 93, 93, 0.8); /* Slightly less transparent border */
+            z-index: 10; 
+        }
+        .top-bar h1 { 
+            margin: 0; letter-spacing: 5px; font-weight: normal;
+            color: #1a241f; text-transform: uppercase;
+            font-family: 'ZCOOL KuaiLe', cursive; font-size: 3rem; /* Updated font */
+        }
 
         .main-container { 
             flex-grow: 1; position: relative; display: flex; overflow: hidden;
             background-repeat: no-repeat; background-position: center; background-size: cover;
         }
 
-        /* --- SIDES --- */
-        .public-side { background-image: url('pinkybackground.png'); }
-        .anon-side { background-image: url('anonymousbackground.png'); }
+        /* --- SIDES & BACKGROUND DARKENING --- */
+        .public-side { 
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pinkybackground.png'); 
+        }
+        .anon-side { 
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('anonymousbackground.png'); 
+        }
 
         /* --- THREAD AREA --- */
         #thread-manager { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; gap: 20px; }
         
-        .thread-card { background: rgba(255, 255, 255, 0.85); border: 2px solid var(--pinky-red); padding: 15px; cursor: pointer; }
-        .thread-card:hover { background: white; }
-        .thread-title { font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid #ccc; margin-bottom: 5px; }
+        .thread-card { 
+            background: rgba(249, 245, 224, 0.85); /* Old Paper with slight transparency */
+            border: 1px solid rgba(163, 93, 93, 0.5); 
+            padding: 15px; cursor: pointer; 
+        }
+        .thread-card:hover { background: var(--old-paper); }
+        .thread-title { font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 5px; }
         .thread-meta { font-size: 0.75rem; color: #555; }
 
         /* --- THE ACTUAL THREAD VIEW --- */
-        #active-thread-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240, 240, 240, 0.98); z-index: 100; display: none; flex-direction: column; }
+        #active-thread-view { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(249, 245, 224, 0.98); /* Solid Old Paper */
+            z-index: 100; display: none; flex-direction: column; 
+        }
         #post-list { flex-grow: 1; overflow-y: auto; padding: 30px; }
-        .post-entry { border-bottom: 2px solid var(--pinky-green); padding: 15px 0; }
-        .post-identity { font-weight: bold; color: var(--pinky-red); margin-bottom: 5px; }
+        .post-entry { border-bottom: 2px solid rgba(141, 163, 153, 0.2); padding: 15px 0; }
+        .post-identity { font-weight: bold; color: rgba(163, 93, 93, 0.9); margin-bottom: 5px; }
 
         /* --- SIDEBAR TOOLS --- */
-        .sidebar { width: 300px; background: rgba(141, 163, 153, 0.9); border-left: 3px solid var(--pinky-red); padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .input-box { width: 90%; padding: 8px; border: 1px solid var(--pinky-red); font-family: inherit; }
-        .btn { background: var(--pinky-red); color: white; border: none; padding: 10px; cursor: pointer; font-weight: bold; font-family: inherit; }
-        .btn:hover { filter: brightness(1.2); }
+        .sidebar { 
+            width: 300px; 
+            background: rgba(141, 163, 153, 0.7); /* Transparent Sidebar */
+            border-left: 2px solid rgba(163, 93, 93, 0.8); 
+            padding: 20px; display: flex; flex-direction: column; gap: 15px; 
+        }
+        .input-box { width: 90%; padding: 8px; border: 1px solid rgba(0,0,0,0.2); font-family: inherit; background: rgba(255,255,255,0.8); }
+        .btn { 
+            background: var(--pinky-red-trans); /* Transparent buttons */
+            color: #222; border: 1px solid rgba(0,0,0,0.2);
+            padding: 10px; cursor: pointer; font-weight: bold; font-family: inherit; 
+        }
+        .btn:hover { background: rgba(163, 93, 93, 0.8); color: white; }
 
         /* --- BOTTOM BAR --- */
-        .controls { background: var(--pinky-green); padding: 10px; border-top: 3px solid var(--pinky-red); display: flex; justify-content: center; gap: 20px; z-index: 10; }
-        .nav-link { color: #3d4a44; text-decoration: none; font-weight: bold; font-size: 0.8rem; border: 1px solid #3d4a44; padding: 5px 10px; }
+        .controls { 
+            background: var(--pinky-green-trans); 
+            padding: 10px; border-top: 2px solid rgba(163, 93, 93, 0.8); 
+            display: flex; justify-content: center; gap: 20px; z-index: 10; 
+        }
+        .nav-link { color: #1a241f; text-decoration: none; font-weight: bold; font-size: 0.8rem; border: 1px solid #1a241f; padding: 5px 10px; }
 
         /* --- MODALS --- */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 4px solid var(--pinky-red); padding: 20px; z-index: 500; width: 400px; box-shadow: 10px 10px 0px #000; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 4px solid rgba(163, 93, 93, 0.8); padding: 20px; z-index: 500; width: 400px; box-shadow: 10px 10px 0px #000; }
     </style>
 </head>
 <body>
@@ -67,17 +106,19 @@
             </div>
 
         <div class="sidebar">
-            <button class="btn" id="switchBtn" style="background: black;">SWITCH SIDES</button>
-            <hr>
-            <input type="text" id="threadSearch" placeholder="Search threads..." class="input-box" oninput="filterThreads()">
+            <button class="btn" id="switchBtn" style="background: rgba(0,0,0,0.8); color: var(--index-blue);">SWITCH SIDES</button>
+            <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.1);">
+            <input type="text" id="threadSearch" placeholder="Search threads..." class="input-box" oninput="window.filterThreads()">
             <button class="btn" id="openCreateBtn">CREATE THREAD</button>
         </div>
 
         <div id="active-thread-view">
-            <button onclick="closeThread()" style="margin: 10px; width: 100px;">BACK</button>
+            <div style="padding: 10px; border-bottom: 1px solid #ccc;">
+                <button onclick="closeThread()" class="btn" style="padding: 5px 15px;">BACK</button>
+            </div>
             <div id="post-list"></div>
-            <div style="padding: 20px; border-top: 2px solid var(--pinky-red);">
-                <textarea id="replyText" class="input-box" style="height: 60px;" placeholder="Write a reply..."></textarea><br>
+            <div style="padding: 20px; border-top: 2px solid rgba(141, 163, 153, 0.5); background: rgba(0,0,0,0.05);">
+                <textarea id="replyText" class="input-box" style="height: 60px; width: 95%;" placeholder="Write a reply..."></textarea><br>
                 <button class="btn" id="submitReplyBtn">REPLY</button>
             </div>
         </div>
@@ -87,15 +128,17 @@
         <a href="https://thering1.github.io/thering.github.io/" class="nav-link">RING</a>
         <a href="https://thering1.github.io/themiddle.github.io/" class="nav-link">MIDDLE</a>
         <a href="https://thering1.github.io/theindex.github.io/" class="nav-link">INDEX</a>
-        <button id="auth-btn" class="btn" style="padding: 5px 10px; font-size: 0.8rem;">LOG IN</button>
+        <button id="auth-btn" class="btn" style="padding: 5px 10px; font-size: 0.8rem; background: rgba(0,0,0,0.8); color: white;">LOG IN</button>
     </div>
 
     <div id="create-modal" class="modal">
         <h3>NEW THREAD</h3>
         <input type="text" id="newTitle" placeholder="Thread Title" class="input-box"><br><br>
         <textarea id="newBody" placeholder="Message..." class="input-box" style="height:100px;"></textarea><br>
-        <button class="btn" id="submitThreadBtn">POST</button>
-        <button onclick="document.getElementById('create-modal').style.display='none'">CANCEL</button>
+        <div style="display:flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+            <button class="btn" id="submitThreadBtn">POST</button>
+            <button onclick="document.getElementById('create-modal').style.display='none'" class="btn" style="background: #ccc; color: black;">CANCEL</button>
+        </div>
     </div>
 
     <div id="auth-modal" class="modal">
@@ -129,7 +172,7 @@
         let isAnonymous = false;
         let activeThreadId = null;
 
-        const starWords = ["Jade", "Crimson", "Void", "Silk", "Iron", "Lotus", "Ghost", "Azure", "Gold", "Dust"];
+        const starWords = ["jade", "crimson", "void", "silk", "iron", "lotus", "ghost", "azure", "gold", "dust", "shadow", "mist"];
 
         // --- AUTH ---
         document.getElementById('auth-btn').onclick = () => document.getElementById('auth-modal').style.display = 'block';
@@ -145,6 +188,19 @@
                 document.getElementById('auth-modal').style.display = 'none';
             } else alert("Unknown Entity.");
         };
+
+        // --- ANON MONIKER LOGIC (Concatenate 2 random words) ---
+        function getAnonName() {
+            let first = starWords[Math.floor(Math.random() * starWords.length)];
+            let second = starWords[Math.floor(Math.random() * starWords.length)];
+            // Ensure we don't get the same word twice (like lotuslotus)
+            while (first === second) {
+                second = starWords[Math.floor(Math.random() * starWords.length)];
+            }
+            // Capitalize first letter of combined word
+            const combined = first + second;
+            return combined.charAt(0).toUpperCase() + combined.slice(1) + " Star";
+        }
 
         // --- BOARD LOGIC ---
         function loadThreads() {
@@ -198,7 +254,7 @@
             if(!title || !body) return;
 
             const boardPath = isAnonymous ? 'anon_threads' : 'public_threads';
-            const author = isAnonymous ? `${starWords[Math.floor(Math.random()*starWords.length)]} Star` : `${currentUser.display_name}, ${currentUser.rank} of the ${currentUser.finger || 'Void'}`;
+            const author = isAnonymous ? getAnonName() : `${currentUser.display_name}, ${currentUser.rank} of the ${currentUser.finger || 'Void'}`;
 
             const threadRef = push(ref(pinkyDb, boardPath));
             await set(threadRef, {
@@ -242,7 +298,7 @@
             const text = document.getElementById('replyText').value;
             if(!text || !activeThreadId || !currentUser) return;
 
-            const author = isAnonymous ? `${starWords[Math.floor(Math.random()*starWords.length)]} Star` : `${currentUser.display_name}, ${currentUser.rank} of the ${currentUser.finger || 'Void'}`;
+            const author = isAnonymous ? getAnonName() : `${currentUser.display_name}, ${currentUser.rank} of the ${currentUser.finger || 'Void'}`;
             const boardPath = isAnonymous ? 'anon_threads' : 'public_threads';
 
             await push(ref(pinkyDb, `posts/${activeThreadId}`), {
