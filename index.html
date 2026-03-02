@@ -15,7 +15,7 @@
         }
 
         body { 
-            margin: 0; padding: 0; font-family: sans-serif; /* Default Typography */
+            margin: 0; padding: 0; font-family: sans-serif;
             background: var(--pinky-bg); color: #222; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
@@ -38,7 +38,6 @@
             background-repeat: no-repeat; background-position: center; background-size: cover;
         }
 
-        /* --- BACKGROUND DARKENING --- */
         .public-side { 
             background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('pinkybackground.png'); 
         }
@@ -46,7 +45,6 @@
             background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('anonymousbackground.png'); 
         }
 
-        /* --- THREAD AREA --- */
         #thread-manager { flex-grow: 1; display: flex; flex-direction: column; padding: 25px; overflow-y: auto; gap: 20px; }
         
         .thread-card { 
@@ -58,7 +56,6 @@
         .thread-title { font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 8px; padding-bottom: 5px; }
         .thread-meta { font-size: 0.75rem; color: #666; }
 
-        /* --- THREAD VIEW OVERLAY --- */
         #active-thread-view { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(249, 245, 224, 0.98); 
@@ -68,7 +65,6 @@
         .post-entry { border-bottom: 1px solid rgba(141, 163, 153, 0.3); padding: 20px 0; }
         .post-identity { font-weight: bold; color: #7a4242; margin-bottom: 8px; font-size: 0.9rem; }
 
-        /* --- SIDEBAR --- */
         .sidebar { 
             width: 320px; 
             background: rgba(141, 163, 153, 0.4); 
@@ -83,7 +79,6 @@
         }
         .btn:hover { background: rgba(163, 93, 93, 0.75); color: white; }
 
-        /* --- BOTTOM BAR --- */
         .controls { 
             background: var(--pinky-green-trans); 
             padding: 12px; border-top: 2px solid rgba(163, 93, 93, 0.4); 
@@ -91,7 +86,6 @@
         }
         .nav-link { color: #1a241f; text-decoration: none; font-weight: bold; font-size: 0.85rem; }
 
-        /* --- MODALS --- */
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fffcf0; border: 3px solid #7a4242; padding: 25px; z-index: 500; width: 420px; box-shadow: 15px 15px 0px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -169,6 +163,13 @@
 
         const starWords = ["Di", "Hua", "Shi", "Yi", "Tian", "Sha", "Gong", "Men", "Shu", "Hui", "Gong", "Xi", "Ba", "Chun", "Can", "Xia", "Xiang"];
 
+        // --- SANITIZATION TOOL ---
+        const sanitize = (str) => {
+            const temp = document.createElement('div');
+            temp.textContent = str || "";
+            return temp.innerHTML;
+        };
+
         document.getElementById('auth-btn').onclick = () => document.getElementById('auth-modal').style.display = 'block';
         
         document.getElementById('loginBtn').onclick = async () => {
@@ -220,7 +221,8 @@
 
                     const card = document.createElement('div');
                     card.className = 'thread-card';
-                    card.innerHTML = `<div class="thread-title">${thread.title}</div><div class="thread-meta">By: ${thread.authorName}</div>`;
+                    // We use sanitize() here even though innerHTML is used for the structure
+                    card.innerHTML = `<div class="thread-title">${sanitize(thread.title)}</div><div class="thread-meta">By: ${sanitize(thread.authorName)}</div>`;
                     card.onclick = () => openThread(tid, thread.title);
                     manager.appendChild(card);
                 });
@@ -244,9 +246,12 @@
             const boardPath = isAnonymous ? 'anon_threads' : 'public_threads';
             const author = getIdentity();
             const threadRef = push(ref(pinkyDb, boardPath));
+            // Data is sent to DB raw, but sanitized when displayed
             await set(threadRef, { title, authorName: author, createdAt: serverTimestamp(), lastActivity: serverTimestamp() });
             await push(ref(pinkyDb, `posts/${threadRef.key}`), { author, text: body, timestamp: serverTimestamp() });
             document.getElementById('create-modal').style.display = 'none';
+            document.getElementById('newTitle').value = "";
+            document.getElementById('newBody').value = "";
         };
 
         window.openThread = (tid, title) => {
@@ -254,12 +259,18 @@
             document.getElementById('active-thread-view').style.display = 'flex';
             onValue(ref(pinkyDb, `posts/${tid}`), snap => {
                 const list = document.getElementById('post-list');
-                list.innerHTML = `<h2 style="border-bottom: 2px solid #7a4242; padding-bottom:10px;">${title}</h2>`;
+                list.innerHTML = "";
+                
+                const titleHeader = document.createElement('h2');
+                titleHeader.style.cssText = "border-bottom: 2px solid #7a4242; padding-bottom:10px;";
+                titleHeader.textContent = title; // textContent is safe
+                list.appendChild(titleHeader);
+
                 snap.forEach(child => {
                     const p = child.val();
                     const div = document.createElement('div');
                     div.className = 'post-entry';
-                    div.innerHTML = `<div class="post-identity">${p.author}</div><div>${p.text}</div>`;
+                    div.innerHTML = `<div class="post-identity">${sanitize(p.author)}</div><div>${sanitize(p.text)}</div>`;
                     list.appendChild(div);
                 });
             });
