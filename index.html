@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Pinky</title>
     <link rel="icon" type="image/png" href="PMLogo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -79,12 +80,48 @@
         }
         .btn:hover { background: rgba(163, 93, 93, 0.75); color: white; }
 
+        /* --- NAVIGATION STYLING --- */
         .controls { 
             background: var(--pinky-green-trans); 
             padding: 12px; border-top: 2px solid rgba(163, 93, 93, 0.4); 
-            display: flex; justify-content: center; gap: 30px; z-index: 10; 
+            display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 10; 
         }
-        .nav-link { color: #1a241f; text-decoration: none; font-weight: bold; font-size: 0.85rem; }
+        
+        .nav-link { 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 0.8rem; 
+            padding: 5px 12px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        /* Unique Styles for each Finger link */
+        .link-ring { 
+            font-family: 'Courier New', Courier, monospace; 
+            color: black; 
+            background: white; 
+            border: 2px solid black; 
+        }
+        .link-middle { 
+            font-family: 'Times New Roman', serif; 
+            color: #3d2b1f; 
+            background: #e6d5c3; 
+        }
+        .link-index { 
+            font-family: 'Share Tech Mono', monospace; 
+            color: #00f2ff; 
+            background: black; 
+            border: 1px solid #00f2ff;
+            text-shadow: 0 0 5px #00f2ff;
+        }
+        .link-thumb {
+            font-family: 'Arial Black', sans-serif;
+            color: #ffcc00;
+            background: #b22222;
+            text-transform: uppercase;
+            border: 2px solid #ffcc00;
+        }
 
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fffcf0; border: 3px solid #7a4242; padding: 25px; z-index: 500; width: 420px; box-shadow: 15px 15px 0px rgba(0,0,0,0.2); }
     </style>
@@ -116,9 +153,10 @@
     </div>
 
     <div class="controls">
-        <a href="https://thering1.github.io/thering.github.io/" class="nav-link">RING</a>
-        <a href="https://thering1.github.io/themiddle.github.io/" class="nav-link">MIDDLE</a>
-        <a href="https://thering1.github.io/theindex.github.io/" class="nav-link">INDEX</a>
+        <a href="https://thering1.github.io/thering.github.io/" class="nav-link link-ring">RING</a>
+        <a href="https://thering1.github.io/themiddle.github.io/" class="nav-link link-middle">MIDDLE</a>
+        <a href="https://thering1.github.io/theindex.github.io/" class="nav-link link-index">INDEX</a>
+        <a href="https://thering1.github.io/thethumb.github.io/" class="nav-link link-thumb">THUMB</a>
         <button id="auth-btn" class="btn" style="padding: 6px 15px; font-size: 0.8rem; background: #000; color: #fff;">LOG IN</button>
     </div>
 
@@ -163,7 +201,6 @@
 
         const starWords = ["Di", "Hua", "Shi", "Yi", "Tian", "Sha", "Gong", "Men", "Shu", "Hui", "Gong", "Xi", "Ba", "Chun", "Can", "Xia", "Xiang"];
 
-        // --- SANITIZATION TOOL ---
         const sanitize = (str) => {
             const temp = document.createElement('div');
             temp.textContent = str || "";
@@ -221,7 +258,6 @@
 
                     const card = document.createElement('div');
                     card.className = 'thread-card';
-                    // We use sanitize() here even though innerHTML is used for the structure
                     card.innerHTML = `<div class="thread-title">${sanitize(thread.title)}</div><div class="thread-meta">By: ${sanitize(thread.authorName)}</div>`;
                     card.onclick = () => openThread(tid, thread.title);
                     manager.appendChild(card);
@@ -246,7 +282,6 @@
             const boardPath = isAnonymous ? 'anon_threads' : 'public_threads';
             const author = getIdentity();
             const threadRef = push(ref(pinkyDb, boardPath));
-            // Data is sent to DB raw, but sanitized when displayed
             await set(threadRef, { title, authorName: author, createdAt: serverTimestamp(), lastActivity: serverTimestamp() });
             await push(ref(pinkyDb, `posts/${threadRef.key}`), { author, text: body, timestamp: serverTimestamp() });
             document.getElementById('create-modal').style.display = 'none';
@@ -263,7 +298,7 @@
                 
                 const titleHeader = document.createElement('h2');
                 titleHeader.style.cssText = "border-bottom: 2px solid #7a4242; padding-bottom:10px;";
-                titleHeader.textContent = title; // textContent is safe
+                titleHeader.textContent = title;
                 list.appendChild(titleHeader);
 
                 snap.forEach(child => {
