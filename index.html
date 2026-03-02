@@ -91,17 +91,18 @@
             text-decoration: none; 
             font-weight: bold; 
             font-size: 0.8rem; 
-            width: 100px; /* Fixed width to ensure same size */
-            height: 30px; /* Fixed height */
+            width: 100px; /* Fixed width for uniform size */
+            height: 30px; /* Fixed height for uniform size */
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid transparent;
             transition: 0.2s;
             text-align: center;
+            box-sizing: border-box; /* Crucial for sizing with borders */
         }
 
-        /* Unique Styles per Finger */
+        /* Unique Styles per Finger with Uniformed Borders */
         .link-ring { 
             font-family: 'Courier New', Courier, monospace; 
             color: black; 
@@ -112,6 +113,7 @@
             font-family: 'Times New Roman', serif; 
             color: #FFD700; /* Gold */
             background: #2e004b; /* Deep Dark Purple */
+            border: 1px solid #FFD700; /* Matching border thickness and gold color */
         }
         .link-index { 
             font-family: 'Share Tech Mono', monospace; 
@@ -123,6 +125,7 @@
             font-family: sans-serif;
             color: white;
             background: #b22222;
+            border: 1px solid #ffcc00; /* Matching border thickness and red color from Thumb site */
         }
 
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fffcf0; border: 3px solid #7a4242; padding: 25px; z-index: 500; width: 420px; box-shadow: 15px 15px 0px rgba(0,0,0,0.2); }
