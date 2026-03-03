@@ -91,18 +91,17 @@
             text-decoration: none; 
             font-weight: bold; 
             font-size: 0.8rem; 
-            width: 100px; /* Fixed width for uniform size */
-            height: 30px; /* Fixed height for uniform size */
+            width: 100px; 
+            height: 30px; 
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid transparent;
             transition: 0.2s;
             text-align: center;
-            box-sizing: border-box; /* Crucial for sizing with borders */
+            box-sizing: border-box; 
         }
 
-        /* Unique Styles per Finger with Uniformed Borders */
         .link-ring { 
             font-family: 'Courier New', Courier, monospace; 
             color: black; 
@@ -111,9 +110,9 @@
         }
         .link-middle { 
             font-family: 'Times New Roman', serif; 
-            color: #FFD700; /* Gold */
-            background: #2e004b; /* Deep Dark Purple */
-            border: 1px solid #FFD700; /* Matching border thickness and gold color */
+            color: #FFD700; 
+            background: #2e004b; 
+            border: 1px solid #FFD700; 
         }
         .link-index { 
             font-family: 'Share Tech Mono', monospace; 
@@ -125,7 +124,7 @@
             font-family: sans-serif;
             color: white;
             background: #b22222;
-            border: 1px solid #ffcc00; /* Matching border thickness and red color from Thumb site */
+            border: 1px solid #ffcc00; 
         }
 
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fffcf0; border: 3px solid #7a4242; padding: 25px; z-index: 500; width: 420px; box-shadow: 15px 15px 0px rgba(0,0,0,0.2); }
@@ -184,13 +183,13 @@
         </div>
         <div id="user-view" style="display:none;">
             <h3 id="welcome-text"></h3>
-            <button class="btn" onclick="location.reload()">LOGOUT</button>
+            <button class="btn" id="logoutBtn">LOGOUT</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, get, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, get, remove, update, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const accountConfig = { databaseURL: "https://account-data-54450-default-rtdb.asia-southeast1.firebasedatabase.app" };
         const pinkyConfig = { databaseURL: "https://index-data-4a3b9-default-rtdb.asia-southeast1.firebasedatabase.app" };
@@ -203,6 +202,8 @@
         let currentUser = null;
         let isAnonymous = false;
         let activeThreadId = null;
+        let currentBoardRef = null;
+        let currentPostRef = null;
 
         const starWords = ["Di", "Hua", "Shi", "Yi", "Tian", "Sha", "Gong", "Men", "Shu", "Hui", "Gong", "Xi", "Ba", "Chun", "Can", "Xia", "Xiang"];
 
@@ -227,6 +228,16 @@
             } else alert("Invalid credentials.");
         };
 
+        document.getElementById('logoutBtn').onclick = () => {
+            currentUser = null;
+            document.getElementById('login-view').style.display = 'block';
+            document.getElementById('user-view').style.display = 'none';
+            document.getElementById('auth-btn').innerText = "LOG IN";
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('uIn').value = "";
+            document.getElementById('pIn').value = "";
+        };
+
         function getAnonName() {
             if (isAnonymous) {
                 let first = starWords[Math.floor(Math.random() * starWords.length)];
@@ -245,11 +256,16 @@
         }
 
         function loadThreads() {
+            if (currentBoardRef) off(currentBoardRef);
             const boardPath = isAnonymous ? 'anon_threads' : 'public_threads';
-            onValue(ref(pinkyDb, boardPath), snap => {
+            currentBoardRef = ref(pinkyDb, boardPath);
+
+            onValue(currentBoardRef, snap => {
                 const manager = document.getElementById('thread-manager');
                 manager.innerHTML = "";
                 const now = Date.now();
+                let threads = [];
+
                 snap.forEach(child => {
                     const thread = child.val();
                     const tid = child.key;
@@ -260,11 +276,17 @@
                         remove(ref(pinkyDb, `posts/${tid}`));
                         return;
                     }
+                    threads.push({ tid, ...thread, lastActivity });
+                });
 
+                // Most recent at top
+                threads.sort((a, b) => b.lastActivity - a.lastActivity);
+
+                threads.forEach(thread => {
                     const card = document.createElement('div');
                     card.className = 'thread-card';
                     card.innerHTML = `<div class="thread-title">${sanitize(thread.title)}</div><div class="thread-meta">By: ${sanitize(thread.authorName)}</div>`;
-                    card.onclick = () => openThread(tid, thread.title);
+                    card.onclick = () => openThread(thread.tid, thread.title);
                     manager.appendChild(card);
                 });
             });
@@ -295,9 +317,12 @@
         };
 
         window.openThread = (tid, title) => {
+            if (currentPostRef) off(currentPostRef);
             activeThreadId = tid;
             document.getElementById('active-thread-view').style.display = 'flex';
-            onValue(ref(pinkyDb, `posts/${tid}`), snap => {
+            currentPostRef = ref(pinkyDb, `posts/${tid}`);
+
+            onValue(currentPostRef, snap => {
                 const list = document.getElementById('post-list');
                 list.innerHTML = "";
                 
@@ -316,7 +341,11 @@
             });
         };
 
-        window.closeThread = () => { document.getElementById('active-thread-view').style.display = 'none'; activeThreadId = null; };
+        window.closeThread = () => { 
+            if (currentPostRef) off(currentPostRef);
+            document.getElementById('active-thread-view').style.display = 'none'; 
+            activeThreadId = null; 
+        };
 
         document.getElementById('submitReplyBtn').onclick = async () => {
             const text = document.getElementById('replyText').value;
